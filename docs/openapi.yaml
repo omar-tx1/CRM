@@ -1,0 +1,447 @@
+openapi: 3.1.0
+info:
+  title: Texas Junk Boyz CRM API
+  version: 0.1.0
+  description: |
+    Initial API contract for the TJB CRM backend. Endpoints will evolve through the planned iterations.
+servers:
+  - url: https://api.texasjunkboyz.dev
+paths:
+  /contacts:
+    get:
+      summary: List contacts
+      operationId: listContacts
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Contact"
+    post:
+      summary: Create contact
+      operationId: createContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactCreateRequest"
+            examples:
+              sample:
+                summary: Basic contact
+                value:
+                  firstName: Alex
+                  lastName: Rivera
+                  phone: "+1-555-000-1111"
+                  email: alex@example.com
+                  address: 123 Main St, Austin, TX
+                  source: Web
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+  /jobs:
+    get:
+      summary: List jobs
+      operationId: listJobs
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Job"
+    post:
+      summary: Create job
+      operationId: createJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobCreateRequest"
+            examples:
+              sample:
+                value:
+                  contactId: con_123
+                  title: Two-Car Garage Cleanout
+                  status: LEAD
+                  address: 8902 Ranch Rd, Austin, TX
+                  serviceWindow: 2024-05-01T14:00:00Z
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+  /quotes:
+    post:
+      summary: Build quote
+      operationId: createQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteCreateRequest"
+            examples:
+              sample:
+                value:
+                  contactId: con_123
+                  lineItems:
+                    - description: 1/4 Load
+                      quantity: 1
+                      unitPrice: 150
+                      surcharge: 0
+                  depositRequired: 50
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+  /quotes/{id}/convert:
+    post:
+      summary: Convert quote to invoice
+      operationId: convertQuote
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceCreateRequest"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+  /payments/stripe-link:
+    post:
+      summary: Create Stripe payment link
+      operationId: createStripePaymentLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentLinkRequest"
+            examples:
+              sample:
+                value:
+                  invoiceId: inv_123
+                  amount: 275
+      responses:
+        "201":
+          description: Payment link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLink"
+  /payments/stripe-webhook:
+    post:
+      summary: Handle Stripe webhook
+      operationId: handleStripeWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Webhook received
+  /accounting/chart-of-accounts:
+    get:
+      summary: List accounts
+      operationId: listAccounts
+      responses:
+        "200":
+          description: Chart of accounts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Account"
+  /accounting/journals:
+    post:
+      summary: Post manual journal
+      operationId: postJournal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalCreateRequest"
+            examples:
+              sample:
+                value:
+                  date: 2024-05-01
+                  memo: Adjust dump fees
+                  lines:
+                    - accountCode: "5200"
+                      debit: 120
+                      credit: 0
+                    - accountCode: "1000"
+                      debit: 0
+                      credit: 120
+      responses:
+        "201":
+          description: Journal posted
+  /accounting/reports/trial-balance:
+    get:
+      summary: Trial balance
+      operationId: getTrialBalance
+      parameters:
+        - in: query
+          name: asOf
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Trial balance data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrialBalanceReport"
+components:
+  schemas:
+    Contact:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        address:
+          type: string
+        source:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ContactCreateRequest:
+      allOf:
+        - $ref: "#/components/schemas/Contact"
+      required:
+        - firstName
+        - lastName
+        - phone
+        - address
+        - source
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+        contactId:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+        address:
+          type: string
+        serviceWindow:
+          type: string
+          format: date-time
+          nullable: true
+    JobCreateRequest:
+      allOf:
+        - $ref: "#/components/schemas/Job"
+      required:
+        - contactId
+        - title
+        - status
+        - address
+    QuoteLineItem:
+      type: object
+      properties:
+        description:
+          type: string
+        quantity:
+          type: number
+        unitPrice:
+          type: number
+        surcharge:
+          type: number
+        taxRateId:
+          type: string
+          nullable: true
+    Quote:
+      type: object
+      properties:
+        id:
+          type: string
+        contactId:
+          type: string
+        number:
+          type: string
+        status:
+          type: string
+        subtotal:
+          type: number
+        taxTotal:
+          type: number
+        total:
+          type: number
+        depositRequired:
+          type: number
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteLineItem"
+    QuoteCreateRequest:
+      type: object
+      required:
+        - contactId
+        - lineItems
+      properties:
+        contactId:
+          type: string
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteLineItem"
+        depositRequired:
+          type: number
+          default: 0
+    InvoiceLineItem:
+      allOf:
+        - $ref: "#/components/schemas/QuoteLineItem"
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        contactId:
+          type: string
+        number:
+          type: string
+        status:
+          type: string
+        subtotal:
+          type: number
+        taxTotal:
+          type: number
+        total:
+          type: number
+        balance:
+          type: number
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineItem"
+    InvoiceCreateRequest:
+      type: object
+      properties:
+        dueAt:
+          type: string
+          format: date-time
+    PaymentLinkRequest:
+      type: object
+      required:
+        - invoiceId
+        - amount
+      properties:
+        invoiceId:
+          type: string
+        amount:
+          type: number
+    PaymentLink:
+      type: object
+      properties:
+        url:
+          type: string
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+    JournalCreateRequest:
+      type: object
+      required:
+        - date
+        - lines
+      properties:
+        date:
+          type: string
+          format: date
+        memo:
+          type: string
+        lines:
+          type: array
+          items:
+            type: object
+            required:
+              - accountCode
+            properties:
+              accountCode:
+                type: string
+              debit:
+                type: number
+                default: 0
+              credit:
+                type: number
+                default: 0
+    TrialBalanceReport:
+      type: object
+      properties:
+        asOf:
+          type: string
+          format: date
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              accountCode:
+                type: string
+              accountName:
+                type: string
+              debit:
+                type: number
+              credit:
+                type: number

@@ -1,0 +1,14 @@
+node_modules
+.next
+.env
+*.log
+pnpm-lock.yaml
+yarn.lock
+dist
+coverage
+prisma/migrations
+.DS_Store
+.vercel
+.vscode
+.idea
+apps/api/prisma/dev.db
