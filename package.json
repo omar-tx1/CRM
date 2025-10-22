@@ -1,0 +1,24 @@
+{
+  "name": "tjb-crm",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run -w apps/api build && npm run -w apps/web build",
+    "dev": "concurrently -r \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run -w apps/api dev",
+    "dev:web": "npm run -w apps/web dev",
+    "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "seed": "npm run -w apps/api seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "eslint": "^9.10.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  }
+}
