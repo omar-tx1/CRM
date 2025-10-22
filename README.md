@@ -57,6 +57,22 @@ npm run dev
 - API available at `http://localhost:4000`
 - Web app available at `http://localhost:3000`
 
+### GitHub Codespaces
+
+The repository includes a `.devcontainer` configuration so you can launch it directly in GitHub Codespaces:
+
+1. Click **Code → Create Codespace on main** in GitHub.
+2. Codespaces automatically provisions Node.js 18 and PostgreSQL 16, installs dependencies, and generates the Prisma client (see `.devcontainer/devcontainer.json`).
+3. Copy `.env.example` to `.env` and adjust secrets. The default `DATABASE_URL` points at the in-container Postgres service.
+4. Run database migrations and seed data:
+
+   ```
+   npm run migrate --workspace apps/api -- --name init
+   npm run seed --workspace apps/api
+   ```
+
+5. Start the dev servers with `npm run dev`. Forwarded ports 3000 (web) and 4000 (API) are preconfigured and appear in the Codespaces port panel.
+
 ### Testing
 
 ```
