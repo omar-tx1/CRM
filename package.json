@@ -1,4 +1,23 @@
 {
+  "name": "tjb-crm-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/types",
+    "packages/ui",
+    "packages/config"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "concurrently \"npm run dev --workspace apps/api\" \"npm run dev --workspace apps/web\"",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspaces",
+    "format": "npm run format --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   "name": "tjb-crm",
   "version": "0.1.0",
   "private": true,

@@ -1,0 +1,41 @@
+{
+  "name": "TJB CRM",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    },
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "16",
+      "database": "tjb_crm",
+      "user": "postgres",
+      "password": "postgres"
+    }
+  },
+  "forwardPorts": [3000, 4000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Web App"
+    },
+    "4000": {
+      "label": "API"
+    }
+  },
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/tjb_crm"
+  },
+  "postCreateCommand": "npm install && npm run generate --workspace apps/api",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "prisma.prisma",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "files.insertFinalNewline": true
+      }
+    }
+  }
+}
